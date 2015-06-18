@@ -90,7 +90,7 @@ catkin_package(
 add_executable(optris_imager_node       src/optris_imager_node.cpp)
 add_executable(optris_colorconvert_node src/optris_colorconvert_node.cpp)
 add_executable(optris_binary_image_node src/optris_binary_image_node.cpp)
-add_executable(optris_driver_node       src/optris_driver_node.cpp src/optris_driver.cpp)
+add_executable(optris_driver_node       src/optris_driver_node.cpp)
 
 add_library(optris_driver
    src/optris_driver.cpp
@@ -133,7 +133,7 @@ endif()
 add_dependencies(optris_imager_node irimager irimageprocessing optris_drivers_generate_messages_cpp)
 add_dependencies(optris_colorconvert_node irimager irimageprocessing optris_drivers_generate_messages_cpp)
 add_dependencies(optris_binary_image_node irimager irimageprocessing ${PROJECT_NAME}_gencfg optris_drivers_generate_messages_cpp)
-add_dependencies(optris_driver_node irimager irimageprocessing optris_drivers_generate_messages_cpp)
+add_dependencies(optris_driver_node optris_driver irimager irimageprocessing optris_drivers_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(optris_imager_node
@@ -162,6 +162,7 @@ target_link_libraries(optris_binary_image_node
 )
 
 target_link_libraries(optris_driver_node
+  optris_driver
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   irimager
