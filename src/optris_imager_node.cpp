@@ -78,7 +78,7 @@ std::string _node_name;
  * @param[in] w image width
  * @param[in] h image height
  */
-void onThermalFrame(unsigned short* image, unsigned int w, unsigned int h, long long timestamp)
+void onThermalFrame(unsigned short* image, unsigned int w, unsigned int h, long long timestamp, void *arg)
 {
   memcpy(&_thermal_image.data[0], image, w * h * sizeof(*image));
 
@@ -104,7 +104,7 @@ void onThermalFrame(unsigned short* image, unsigned int w, unsigned int h, long 
 
 }
 
-void onVisibleFrame(unsigned char* image, unsigned int w, unsigned int h)
+void onVisibleFrame(unsigned char* image, unsigned int w, unsigned int h, long long timestamp, void *arg)
 {
   if(_visible_pub->getNumSubscribers()==0) return;
 
