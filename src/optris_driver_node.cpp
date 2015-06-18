@@ -16,7 +16,7 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
 
   drv = new OptrisDriver(n, n_);
-  drv->run();
+  ros::spin ();
 
   return 0;
 }

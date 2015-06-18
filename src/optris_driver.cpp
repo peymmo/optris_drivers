@@ -157,24 +157,19 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_)
   //advertise all the camera Temperature in a single custom message
   _temp_pub = n.advertise <optris_drivers::Temperature> ("internal_temperature", 1);
 
+  ros::Duration timer_delay(1.0/_imager->getMaxFramerate());
+  ROS_INFO ("OptrisDriver: camera timer duration = %f", timer_delay.toSec());
+  camera_timer = n.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
+  streaming_ok = _imager->startStreaming();
   ROS_INFO("OptrisDriver: init done");
 }
 
-void OptrisDriver::run (void)
+void OptrisDriver::camera_timer_callback (const ros::TimerEvent& e)
 {
-  ROS_INFO("OptrisDriver: starting run()");
-  _imager->startStreaming();
-
-  // loop over acquire-process-release-publish steps
-  // Images are published in raw temperature format (unsigned short, see onFrame callback for details)
-  ros::Rate loop_rate(_imager->getMaxFramerate());
-  while(ros::ok())
-  {
-    _imager->getFrame(bufferRaw);
-    _imager->process(bufferRaw, this);
-    _imager->releaseFrame();
-    ros::spinOnce();
-    loop_rate.sleep();
+  if (streaming_ok) {
+     _imager->getFrame(bufferRaw);
+     _imager->process(bufferRaw, this);
+     _imager->releaseFrame();
   }
-  ros::shutdown();
 }
+

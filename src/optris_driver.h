@@ -25,8 +25,6 @@ class OptrisDriver {
     OptrisDriver (ros::NodeHandle n, ros::NodeHandle n_);
     ~OptrisDriver (void);
 
-    void run (void);
-
     camera_info_manager::CameraInfoManager *cinfo_manager_;
 
     image_transport::CameraPublisher _thermal_pub;
@@ -38,6 +36,8 @@ class OptrisDriver {
     unsigned int _img_cnt;
     optris::IRImager * _imager;
     unsigned char * bufferRaw;
+    bool streaming_ok;
+    ros::Timer camera_timer;
 
     std::string _thermalframe_id,_visibleframe_id;
     std::string _camera_calibration_url;
@@ -45,7 +45,7 @@ class OptrisDriver {
 
     bool onAutoFlag(optris_drivers::AutoFlag::Request &req, optris_drivers::AutoFlag::Response &res);
     bool onForceFlag(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
-
+    void camera_timer_callback (const ros::TimerEvent& e);
 };
 
 

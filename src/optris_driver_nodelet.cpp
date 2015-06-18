@@ -20,7 +20,6 @@ private:
   virtual void onInit()
   {
     drv.reset(new OptrisDriver(getNodeHandle(), getPrivateNodeHandle()));
-    drv->run();
   };
 
   boost::shared_ptr<OptrisDriver> drv;
