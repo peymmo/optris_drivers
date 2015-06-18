@@ -1,0 +1,18 @@
+<launch>
+
+  <arg name="optrisId" default="13120040" />
+  <arg name="camera_node" default="optris_$(arg optrisId)" />
+  <arg name="calibration_file" default="file://$(find optris_drivers)/calibration/optris_$(arg optrisId).yaml" />
+
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager"/>
+
+  <node pkg="nodelet" type="nodelet" name="driver"
+        args="load optris_drivers/OptrisDriverNodelet nodelet_manager">
+    <param name="xmlConfig"      type="string" value="$(find optris_drivers)/config/$(arg optrisId).xml"/>  
+    <param name="thermal_frame_id"      type="string" value="thermal_images"/> 
+     <!-- Camera calibration file -->
+    <param name="calibration_file"  type="string" value="$(arg calibration_file)" />
+    <param name="camera_name"  type="string" value="$(arg camera_node)" />
+  </node>
+
+</launch>

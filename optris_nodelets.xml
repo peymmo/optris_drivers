@@ -1,0 +1,10 @@
+<!-- Optris driver nodelet publisher -->
+<library path="lib/liboptris_driver_nodelet">
+
+  <class name="optris_drivers/OptrisDriverNodelet" type="optris_drivers::OptrisDriverNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+      Optris camera driver nodelet.
+    </description>
+  </class>
+
+</library>
