@@ -164,6 +164,11 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_)
   ROS_INFO("OptrisDriver: init done");
 }
 
+OptrisDriver::~OptrisDriver(void)
+{
+
+}
+
 void OptrisDriver::camera_timer_callback (const ros::TimerEvent& e)
 {
   if (streaming_ok) {
