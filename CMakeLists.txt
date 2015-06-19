@@ -68,6 +68,8 @@ catkin_package(
  LIBRARIES
   optris_driver
   optris_driver_nodelet
+  optris_colorconvert
+  optris_colorconvert_nodelet
  CATKIN_DEPENDS
   roscpp
   std_msgs
@@ -92,6 +94,9 @@ add_executable(optris_colorconvert_node src/optris_colorconvert_node.cpp)
 add_executable(optris_binary_image_node src/optris_binary_image_node.cpp)
 add_executable(optris_driver_node       src/optris_driver_node.cpp)
 
+## Libraries
+
+## Optris driver library
 add_library(optris_driver
    src/optris_driver.cpp
 )
@@ -108,6 +113,7 @@ add_dependencies(optris_driver
   optris_drivers_generate_messages_cpp
 )
 
+## Optris driver nodelet library
 add_library(optris_driver_nodelet
    src/optris_driver_nodelet.cpp
 )
@@ -128,10 +134,49 @@ if(catkin_EXPORTED_LIBRARIES)
   add_dependencies(optris_driver_nodelet ${catkin_EXPORTED_LIBRARIES})
 endif()
 
+## Optris color convert library
+add_library(optris_colorconvert
+   src/optris_colorconvert.cpp
+)
+target_link_libraries(optris_colorconvert
+  irimager
+  irimageprocessing
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  udev
+  pthread
+)
+add_dependencies(optris_colorconvert
+  ${PROJECT_NAME}_gencfg
+  optris_drivers_generate_messages_cpp
+)
+
+## Optris colorconvert nodelet library
+add_library(optris_colorconvert_nodelet
+   src/optris_colorconvert_nodelet.cpp
+)
+target_link_libraries(optris_colorconvert_nodelet
+  optris_colorconvert
+  irimager
+  irimageprocessing
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+  udev
+  pthread
+)
+add_dependencies(optris_colorconvert_nodelet
+  optris_colorconvert
+  ${PROJECT_NAME}_gencfg
+  optris_drivers_generate_messages_cpp
+)
+if(catkin_EXPORTED_LIBRARIES)
+  add_dependencies(optris_colorconvert_nodelet ${catkin_EXPORTED_LIBRARIES})
+endif()
+
 ## make sure msg/srvs are generated before building the targets
 ## also, the libs must be copied before trying to build the other files
 add_dependencies(optris_imager_node irimager irimageprocessing optris_drivers_generate_messages_cpp)
-add_dependencies(optris_colorconvert_node irimager irimageprocessing optris_drivers_generate_messages_cpp)
+add_dependencies(optris_colorconvert_node optris_colorconvert irimager irimageprocessing optris_drivers_generate_messages_cpp)
 add_dependencies(optris_binary_image_node irimager irimageprocessing ${PROJECT_NAME}_gencfg optris_drivers_generate_messages_cpp)
 add_dependencies(optris_driver_node optris_driver irimager irimageprocessing optris_drivers_generate_messages_cpp)
 
@@ -146,6 +191,7 @@ target_link_libraries(optris_imager_node
 )
 
 target_link_libraries(optris_colorconvert_node
+  optris_colorconvert
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   irimager

@@ -8,3 +8,13 @@
   </class>
 
 </library>
+
+<library path="lib/liboptris_colorconvert_nodelet">
+
+  <class name="optris_drivers/OptrisColorConvertNodelet" type="optris_drivers::OptrisColorConvertNodelet" base_class_type="nodelet::Nodelet">
+    <description>
+      Optris camera color conversion nodelet.
+    </description>
+  </class>
+
+</library>

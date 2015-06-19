@@ -4,15 +4,25 @@
   <arg name="camera_node" default="optris_$(arg optrisId)" />
   <arg name="calibration_file" default="file://$(find optris_drivers)/calibration/optris_$(arg optrisId).yaml" />
 
-  <node pkg="nodelet" type="nodelet" name="nodelet_manager"  args="manager"/>
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />
 
   <node pkg="nodelet" type="nodelet" name="driver"
-        args="load optris_drivers/OptrisDriverNodelet nodelet_manager">
+        args="load optris_drivers/OptrisDriverNodelet nodelet_manager" output="screen" >
     <param name="xmlConfig"      type="string" value="$(find optris_drivers)/config/$(arg optrisId).xml"/>  
     <param name="thermal_frame_id"      type="string" value="thermal_images"/> 
      <!-- Camera calibration file -->
     <param name="calibration_file"  type="string" value="$(arg calibration_file)" />
     <param name="camera_name"  type="string" value="$(arg camera_node)" />
+  </node>
+
+  <node pkg="nodelet" type="nodelet" name="colorconvert"
+        args="load optris_drivers/OptrisColorConvertNodelet nodelet_manager">
+    <param name="thermal_topic"        type="string"    value="/image_raw"/>
+    <param name="palette"        type="int"    value="6"/>
+    <param name="paletteScaling" type="int"    value="2"/>
+    <param name="temperatureMin" type="double" value="20"/>
+    <param name="temperatureMax" type="double" value="40"/>
+    <param name="looprate"       type="double" value="30"/>
   </node>
 
 </launch>
