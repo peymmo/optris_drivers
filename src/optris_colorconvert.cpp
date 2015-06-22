@@ -115,7 +115,7 @@ OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_)
   image_transport::CameraSubscriber subThermal= it.subscribeCamera(_thermalimage_topic, 1, 
     &OptrisColorConvert::onThermalDataReceive, this);
 
-  _pubThermal = it.advertiseCamera("/thermal_image_view/image_raw", 1);
+  _pubThermal = it.advertiseCamera("thermal_image_view", 1);
   _pubVisible = it.advertise("visible_image_view", 1);
 
   // set to png compression
