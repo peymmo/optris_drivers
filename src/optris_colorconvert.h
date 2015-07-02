@@ -16,7 +16,7 @@ class OptrisColorConvert {
 
     unsigned char*                    _bufferThermal;
     unsigned char*                    _bufferVisible;
-    image_transport::CameraPublisher  _pubThermal;
+    image_transport::Publisher        _pubThermal;
     image_transport::Publisher        _pubVisible;
     unsigned int                      _frame;
 

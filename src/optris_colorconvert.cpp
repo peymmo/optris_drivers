@@ -36,13 +36,7 @@ void OptrisColorConvert::onThermalDataReceive (const sensor_msgs::ImageConstPtr&
   _thermal_image->data.resize(image->width * image->height * 3);
   memcpy(&_thermal_image->data[0], _bufferThermal, image->width * image->height * 3);
 
-  sensor_msgs::CameraInfoPtr _thermal_camera_info(new sensor_msgs::CameraInfo(*cam_info));
-  _thermal_camera_info->header.stamp=_thermal_image->header.stamp;
-  _thermal_camera_info->header.frame_id = _thermal_image->header.frame_id;
-  _thermal_camera_info->height          = _thermal_image->height;
-  _thermal_camera_info->width           = _thermal_image->width;
-
-  _pubThermal.publish(_thermal_image, _thermal_camera_info);
+  _pubThermal.publish(_thermal_image);
 }
 
 void OptrisColorConvert::onVisibleDataReceive(const sensor_msgs::ImageConstPtr& image)
@@ -117,7 +111,7 @@ OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_):
   image_transport::CameraSubscriber subThermal= it.subscribeCamera(_thermalimage_topic, 1, 
     &OptrisColorConvert::onThermalDataReceive, this);
 
-  _pubThermal = it.advertiseCamera("thermal_image_view", 1);
+  _pubThermal = it.advertise("thermal_image_view", 1);
   _pubVisible = it.advertise("visible_image_view", 1);
 
   // set to png compression
