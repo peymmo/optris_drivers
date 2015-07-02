@@ -5,8 +5,6 @@
 
 #include "optris_driver.h"
 
-OptrisDriver * drv;
-
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "optris_driver_node");
@@ -15,7 +13,7 @@ int main(int argc, char **argv)
   ros::NodeHandle n_("~");
   ros::NodeHandle n;
 
-  drv = new OptrisDriver(n, n_);
+  boost::shared_ptr<OptrisDriver> drv(new OptrisDriver(n, n_));
   ros::spin ();
 
   return 0;

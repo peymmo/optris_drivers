@@ -4,6 +4,8 @@
   <arg name="camera_node" default="optris_$(arg optrisId)" />
   <arg name="calibration_file" default="file://$(find optris_drivers)/calibration/optris_$(arg optrisId).yaml" />
 
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find optris_drivers)/custom_rosconsole.conf"/>
+
   <group ns="optris">
 
     <node name="optris_driver_node" pkg="optris_drivers" type="optris_driver_node" output="screen">
