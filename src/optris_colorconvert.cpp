@@ -101,18 +101,16 @@ OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_):
 
   _iBuilder.setManualTemperatureRange((float)tMin, (float)tMax);
 
-  image_transport::ImageTransport it(nh_);
+  it = new image_transport::ImageTransport (nh_);
   nh_private_.param<std::string>("thermal_topic", _thermalimage_topic, "thermal_image");
   nh_private_.param<std::string>("visible_topic", _visibleimage_topic, "visible_image");
 
   ROS_INFO ("OptrisColorConvert: subscribing to %s", _thermalimage_topic.c_str());
-  image_transport::Subscriber subVisible = it.subscribe(_visibleimage_topic, 1,
-    &OptrisColorConvert::onVisibleDataReceive, this);
-  image_transport::CameraSubscriber subThermal= it.subscribeCamera(_thermalimage_topic, 1, 
-    &OptrisColorConvert::onThermalDataReceive, this);
+  subVisible = it->subscribe(_visibleimage_topic, 1, &OptrisColorConvert::onVisibleDataReceive, this);
+  subThermal = it->subscribeCamera(_thermalimage_topic, 1, &OptrisColorConvert::onThermalDataReceive, this);
 
-  _pubThermal = it.advertise("thermal_image_view", 1);
-  _pubVisible = it.advertise("visible_image_view", 1);
+  _pubThermal = it->advertise("thermal_image_view", 1);
+  _pubVisible = it->advertise("visible_image_view", 1);
 
   // set to png compression
   std::string key;
@@ -128,7 +126,7 @@ OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_):
 
 OptrisColorConvert::~OptrisColorConvert (void)
 {
-
+  delete it;
 }
 
 

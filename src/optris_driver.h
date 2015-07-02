@@ -30,11 +30,15 @@ class OptrisDriver {
 
     camera_info_manager::CameraInfoManager *cinfo_manager_;
 
+    image_transport::ImageTransport *it;
     image_transport::CameraPublisher _thermal_pub;
     image_transport::Publisher _visible_pub;
 
     ros::Publisher _timer_pub;
     ros::Publisher _temp_pub;
+
+    ros::ServiceServer sAuto;
+    ros::ServiceServer sForce;
 
     unsigned int _img_cnt;
     optris::IRImager * _imager;

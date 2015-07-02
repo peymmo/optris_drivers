@@ -139,22 +139,22 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   _imager->setFrameCallback(onThermalFrame);
   _imager->setVisibleFrameCallback(onVisibleFrame);
 
-  image_transport::ImageTransport it(nh_);
+  it = new image_transport::ImageTransport (nh_);
 
   //image_transport::Publisher tpub = it.advertise("thermal_image", 1);
-  _thermal_pub = it.advertiseCamera("image_raw", 1);
+  _thermal_pub = it->advertiseCamera("image_raw", 1);
 
   if(_imager->hasBispectralTechnology())
   {
-    _visible_pub = it.advertise("visible_image", 1);
+    _visible_pub = it->advertise("visible_image", 1);
   }
 
 
   // advertise the camera internal timer
    _timer_pub= nh_.advertise<sensor_msgs::TimeReference>("optris_timer", 1 );
 
-  ros::ServiceServer sAuto  = nh_private_.advertiseService("auto_flag",  &OptrisDriver::onAutoFlag, this);
-  ros::ServiceServer sForce = nh_private_.advertiseService("force_flag", &OptrisDriver::onForceFlag, this);
+  sAuto  = nh_private_.advertiseService("auto_flag",  &OptrisDriver::onAutoFlag, this);
+  sForce = nh_private_.advertiseService("force_flag", &OptrisDriver::onForceFlag, this);
 
   //advertise all the camera Temperature in a single custom message
   _temp_pub = nh_.advertise <optris_drivers::Temperature> ("internal_temperature", 1);
@@ -168,7 +168,10 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
 
 OptrisDriver::~OptrisDriver(void)
 {
-
+  delete it;
+  delete cinfo_manager_;
+  delete _imager;
+  delete bufferRaw;
 }
 
 void OptrisDriver::camera_timer_callback (const ros::TimerEvent& e)

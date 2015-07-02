@@ -18,6 +18,10 @@ class OptrisColorConvert {
     unsigned char*                    _bufferVisible;
     image_transport::Publisher        _pubThermal;
     image_transport::Publisher        _pubVisible;
+    image_transport::ImageTransport   *it;
+    image_transport::Subscriber       subVisible;
+    image_transport::CameraSubscriber subThermal;
+
     unsigned int                      _frame;
 
     ros::Timer camera_timer;
