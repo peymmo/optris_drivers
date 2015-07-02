@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="optrisId" default="13120040" />
+  <arg name="camera_node" default="optris_$(arg optrisId)" />
+  <arg name="calibration_file" default="file://$(find optris_drivers)/calibration/optris_$(arg optrisId).yaml" />
+
+  <env name="ROSCONSOLE_CONFIG_FILE" value="$(find optris_drivers)/custom_rosconsole.conf"/>
+
+  <node name="optris_colorconvert_node" pkg="optris_drivers" type="optris_colorconvert_node" output="screen">
+    <param name="thermal_topic"        type="string"    value="/image_raw"/>
+    <param name="palette"        type="int"    value="6"/>     <!-- see ImageBuilder.h for valid values -->
+    <param name="paletteScaling" type="int"    value="2"/>     <!-- scaling method for color conversion, see ImageBuilder.h -->
+    <param name="temperatureMin" type="double" value="20"/>    <!-- set minimum temperature for fixed scaling -->
+    <param name="temperatureMax" type="double" value="40"/>    <!-- set maximum temperature for fixed scaling -->
+    <param name="looprate"       type="double" value="30"/>    <!-- set frame rate to publish images -->
+    <!-- Uncomment the following line, if you want to use PNG compression. Use rosrun dynamic_reconfigure reconfigure_gui to pick PNG format --> 
+    <!-- <param name="image_transport" type="string" value="compressed"/> -->
+  </node>
+
+</launch>
