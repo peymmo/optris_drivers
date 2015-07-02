@@ -99,28 +99,30 @@ bool OptrisDriver::onForceFlag(std_srvs::Empty::Request& req, std_srvs::Empty::R
   return true;
 }
 
-OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_)
+OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
+  nh_(n),
+  nh_private_(n_)
 {
   // Header frame_id should be optical frame of camera
-  n_.param<std::string>("thermal_frame_id", _thermalframe_id, "thermal_image_optical_frame");
-  n_.param<std::string>("visible_frame_id", _visibleframe_id, "visible_image_optical_frame");
+  nh_private_.param<std::string>("thermal_frame_id", _thermalframe_id, "thermal_image_optical_frame");
+  nh_private_.param<std::string>("visible_frame_id", _visibleframe_id, "visible_image_optical_frame");
 
-  n_.getParam("camera_name", _node_name);
+  nh_private_.getParam("camera_name", _node_name);
 
   // set up information manager
-   if (!n_.getParam("calibration_file", _camera_calibration_url))
+   if (!nh_private_.getParam("calibration_file", _camera_calibration_url))
    {
      _camera_calibration_url = "";
    }
 
-   cinfo_manager_ = new camera_info_manager::CameraInfoManager(n_, _node_name, _camera_calibration_url);
+   cinfo_manager_ = new camera_info_manager::CameraInfoManager(nh_private_, _node_name, _camera_calibration_url);
    if (cinfo_manager_->isCalibrated())
    {
        ROS_INFO("camera has loaded calibration file");
    }
 
   std::string xmlConfig = "";
-  n_.getParam("xmlConfig", xmlConfig);
+  nh_private_.getParam("xmlConfig", xmlConfig);
 
   // A specific configuration file for each imager device is needed (cf. config directory)
   struct stat s;
@@ -137,7 +139,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_)
   _imager->setFrameCallback(onThermalFrame);
   _imager->setVisibleFrameCallback(onVisibleFrame);
 
-  image_transport::ImageTransport it(n);
+  image_transport::ImageTransport it(nh_);
 
   //image_transport::Publisher tpub = it.advertise("thermal_image", 1);
   _thermal_pub = it.advertiseCamera("image_raw", 1);
@@ -149,17 +151,17 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_)
 
 
   // advertise the camera internal timer
-   _timer_pub= n.advertise<sensor_msgs::TimeReference>("optris_timer", 1 );
+   _timer_pub= nh_.advertise<sensor_msgs::TimeReference>("optris_timer", 1 );
 
-  ros::ServiceServer sAuto  = n_.advertiseService("auto_flag",  &OptrisDriver::onAutoFlag, this);
-  ros::ServiceServer sForce = n_.advertiseService("force_flag", &OptrisDriver::onForceFlag, this);
+  ros::ServiceServer sAuto  = nh_private_.advertiseService("auto_flag",  &OptrisDriver::onAutoFlag, this);
+  ros::ServiceServer sForce = nh_private_.advertiseService("force_flag", &OptrisDriver::onForceFlag, this);
 
   //advertise all the camera Temperature in a single custom message
-  _temp_pub = n.advertise <optris_drivers::Temperature> ("internal_temperature", 1);
+  _temp_pub = nh_.advertise <optris_drivers::Temperature> ("internal_temperature", 1);
 
   ros::Duration timer_delay(1.0/_imager->getMaxFramerate());
   ROS_INFO ("OptrisDriver: camera timer duration = %f", timer_delay.toSec());
-  camera_timer = n.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
+  camera_timer = nh_.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
   streaming_ok = _imager->startStreaming();
   ROS_INFO("OptrisDriver: init done");
 }

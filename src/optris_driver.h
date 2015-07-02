@@ -25,6 +25,9 @@ class OptrisDriver {
     OptrisDriver (ros::NodeHandle n, ros::NodeHandle n_);
     ~OptrisDriver (void);
 
+    ros::NodeHandle& nh_;
+    ros::NodeHandle& nh_private_;
+
     camera_info_manager::CameraInfoManager *cinfo_manager_;
 
     image_transport::CameraPublisher _thermal_pub;

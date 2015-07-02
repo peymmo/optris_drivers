@@ -78,18 +78,20 @@ void OptrisColorConvert::onVisibleDataReceive(const sensor_msgs::ImageConstPtr& 
   _pubVisible.publish(_visible_image);
 }
 
-OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_)
+OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_):
+  nh_(n),
+  nh_private_(n_)
 {
   _bufferThermal = NULL;
   _bufferVisible = NULL;
 
   int palette = 6;
-  n_.getParam("palette", palette);
+  nh_private_.getParam("palette", palette);
   _palette = (optris::EnumOptrisColoringPalette) palette;
 
   optris::EnumOptrisPaletteScalingMethod scalingMethod = optris::eMinMax;
   int sm;
-  n_.getParam("paletteScaling", sm);
+  nh_private_.getParam("paletteScaling", sm);
   if(sm>=1 && sm <=4) scalingMethod = (optris::EnumOptrisPaletteScalingMethod) sm;
 
   _iBuilder.setPaletteScalingMethod(scalingMethod);
@@ -98,16 +100,16 @@ OptrisColorConvert::OptrisColorConvert (ros::NodeHandle n, ros::NodeHandle n_)
   double tMin     = 20.;
   double tMax     = 40.;
 
-  n_.getParam("temperatureMin", tMin);
-  n_.getParam("temperatureMax", tMax);
-  n_.param("skip_count", skip_count_thermal, 3);
+  nh_private_.getParam("temperatureMin", tMin);
+  nh_private_.getParam("temperatureMax", tMax);
+  nh_private_.param("skip_count", skip_count_thermal, 3);
   skip_count_visible = skip_count_thermal;
 
   _iBuilder.setManualTemperatureRange((float)tMin, (float)tMax);
 
-  image_transport::ImageTransport it(n);
-  n_.param<std::string>("thermal_topic", _thermalimage_topic, "thermal_image");
-  n_.param<std::string>("visible_topic", _visibleimage_topic, "visible_image");
+  image_transport::ImageTransport it(nh_);
+  nh_private_.param<std::string>("thermal_topic", _thermalimage_topic, "thermal_image");
+  nh_private_.param<std::string>("visible_topic", _visibleimage_topic, "visible_image");
 
   ROS_INFO ("OptrisColorConvert: subscribing to %s", _thermalimage_topic.c_str());
   image_transport::Subscriber subVisible = it.subscribe(_visibleimage_topic, 1,

@@ -28,5 +28,7 @@ class OptrisColorConvert {
     optris::ImageBuilder              _iBuilder;
     optris::EnumOptrisColoringPalette _palette;
 
+    ros::NodeHandle& nh_;
+    ros::NodeHandle& nh_private_;
 };
 
