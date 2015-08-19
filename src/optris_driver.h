@@ -1,11 +1,13 @@
 
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <camera_info_manager/camera_info_manager.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/TimeReference.h>
+
 #include "std_msgs/Float32.h"
 #include "std_srvs/Empty.h"
+
 #include "optris_drivers/AutoFlag.h"
 #include <optris_drivers/Temperature.h>
 
@@ -13,6 +15,9 @@
 #include "libirimager/ImageBuilder.h"
 
 #include <sys/stat.h>
+
+#include "filter.h"
+
 using namespace std;
 
 class OptrisDriver {
@@ -45,7 +50,11 @@ class OptrisDriver {
     unsigned char * bufferRaw;
     bool streaming_ok;
     ros::Timer camera_timer;
+    Filter * optris_timer_filter;
+    double prev_timestamp;
 
+    bool use_device_timer;
+    int filter_size;
     std::string _thermalframe_id,_visibleframe_id;
     std::string _camera_calibration_url;
     std::string _node_name;

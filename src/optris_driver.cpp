@@ -27,11 +27,38 @@ void OptrisDriver::onThermalFrame(unsigned short* image, unsigned int w, unsigne
   OptrisDriver *p = (OptrisDriver *) arg;
 
   ros::Time ros_now = ros::Time::now();
+  ros::Time ts;
+
+  if (!p->use_device_timer)
+  {
+    ts = ros_now;
+    ROS_DEBUG("Time interval between frames: %.4f ms", (float)((ros_now.toSec()-p->prev_timestamp)*1000.0));
+    p->prev_timestamp = ros_now.toSec();
+  } else {
+    uint64_t device_time = timestamp*100;
+
+    double device_time_in_sec = static_cast<double>(device_time)/10000000.0;
+    double ros_time_in_sec = ros_now.toSec();
+
+    double time_diff = ros_time_in_sec-device_time_in_sec;
+
+    p->optris_timer_filter->addSample(time_diff);
+
+    double filtered_time_diff = p->optris_timer_filter->getMedian();
+
+    double corrected_timestamp = device_time_in_sec+filtered_time_diff;
+
+    ts.fromSec(corrected_timestamp);
+
+    ROS_DEBUG("Time interval between frames: %.4f ms", (float)((corrected_timestamp-p->prev_timestamp)*1000.0));
+
+    p->prev_timestamp = corrected_timestamp;
+  }
 
   /* thermal image */
   sensor_msgs::ImagePtr _thermal_image(new sensor_msgs::Image);
   _thermal_image->header.seq = ++p->_img_cnt;
-  _thermal_image->header.stamp = ros_now;
+  _thermal_image->header.stamp = ts;
   _thermal_image->header.frame_id = p->_thermalframe_id;
   _thermal_image->height          = p->_imager->getHeight();
   _thermal_image->width           = p->_imager->getWidth();
@@ -53,7 +80,7 @@ void OptrisDriver::onThermalFrame(unsigned short* image, unsigned int w, unsigne
   _optris_timer->header.frame_id=_thermal_image->header.frame_id;
   _optris_timer->header.seq = _thermal_image->header.seq;
   _optris_timer->header.stamp = _thermal_image->header.stamp;
-  _optris_timer->time_ref.fromNSec(timestamp);
+  _optris_timer->time_ref.fromNSec(timestamp*100);
   p->_timer_pub.publish(_optris_timer);
 
   optris_drivers::TemperaturePtr _internal_temperature(new optris_drivers::Temperature);
@@ -106,8 +133,14 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   // Header frame_id should be optical frame of camera
   nh_private_.param<std::string>("thermal_frame_id", _thermalframe_id, "thermal_image_optical_frame");
   nh_private_.param<std::string>("visible_frame_id", _visibleframe_id, "visible_image_optical_frame");
-
+  nh_private_.param<bool>("use_device_timer", use_device_timer, true);
+  nh_private_.param<int>("filter_size", filter_size, 100);
   nh_private_.getParam("camera_name", _node_name);
+
+  // filter
+  if (use_device_timer)
+    ROS_INFO("optris_driver: using device timer, filter size = %d", filter_size);
+  optris_timer_filter = new Filter(filter_size);
 
   // set up information manager
    if (!nh_private_.getParam("calibration_file", _camera_calibration_url))
