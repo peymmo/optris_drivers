@@ -94,6 +94,8 @@ void OptrisDriver::onThermalFrame(unsigned short* image, unsigned int w, unsigne
   _internal_temperature->temperature_box = p->_imager->getTempBox();
   _internal_temperature->temperature_chip = p->_imager->getTempChip();
   p->_temp_pub.publish(_internal_temperature);
+
+  p->cb_duration.add_data (ros::Time::now().toSec() - ros_now.toSec());
 }
 
 void OptrisDriver::onVisibleFrame(unsigned char* image, unsigned int w, unsigned int h, long long timestamp, void *arg)
@@ -143,6 +145,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   nh_private_.param<double>("transmissivity", transmissivity, 0.0);
 
   streaming_ok = false;
+  processing_image = false;
 
   // filter
   if (use_device_timer)
@@ -204,7 +207,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   f = boost::bind(&OptrisDriver::dyn_reconfig_cb, this, _1, _2);
   server->setCallback(f);
 
-  ros::Duration timer_delay(1.0/_imager->getMaxFramerate());
+  ros::Duration timer_delay(1.0/(_imager->getMaxFramerate()*10.0));
   ROS_INFO ("OptrisDriver: camera timer duration = %f", timer_delay.toSec());
   camera_timer = nh_.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
   ROS_INFO("OptrisDriver: init done");
@@ -212,6 +215,9 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
 
 OptrisDriver::~OptrisDriver(void)
 {
+  fprintf (stderr, "optris_driver: stats %d, %f, %f\n", cb_duration.n, cb_duration.mean,
+           cb_duration.std_deviation);
+  fprintf (stderr, "optris_driver: stats %f, %f\n", cb_duration.min_x, cb_duration.max_x);
   delete it;
   delete cinfo_manager_;
   delete _imager;
@@ -220,10 +226,15 @@ OptrisDriver::~OptrisDriver(void)
 
 void OptrisDriver::camera_timer_callback (const ros::TimerEvent& e)
 {
-  if (streaming_ok) {
-     _imager->getFrame(bufferRaw);
-     _imager->process(bufferRaw, this);
-     _imager->releaseFrame();
+  if (! processing_image) {
+    processing_image = true;
+    if (streaming_ok) {
+      if (_imager->getFrame(bufferRaw)) {
+        _imager->process(bufferRaw, this);
+        _imager->releaseFrame();
+      }
+    }
+    processing_image = false;
   }
 }
 

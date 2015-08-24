@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 
 #include "filter.h"
+#include "simple_stat.h"
 
 using namespace std;
 
@@ -54,9 +55,11 @@ class OptrisDriver {
     optris::IRImager * _imager;
     unsigned char * bufferRaw;
     bool streaming_ok;
+    bool processing_image;
     ros::Timer camera_timer;
     Filter * optris_timer_filter;
     double prev_timestamp;
+    SimpleStat cb_duration;
 
     bool use_device_timer;
     int filter_size;

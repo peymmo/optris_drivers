@@ -15,7 +15,7 @@
       <!-- Camera calibration file -->
       <param name="calibration_file"  type="string" value="$(arg calibration_file)" />
       <param name="camera_name"  type="string" value="$(arg camera_node)" />
-      <param name="use_device_timer" type="bool" value="true" />
+      <param name="use_device_timer" type="bool" value="false" />
       <param name="filter_size" type="int" value="80" />
       <param name="emmisivity" type="double" value="98.0" />
       <param name="transmissivity" type="double" value="0.0" />

@@ -99,7 +99,7 @@ add_executable(optris_driver_node       src/optris_driver_node.cpp)
 
 ## Optris driver library
 add_library(optris_driver
-   src/optris_driver.cpp src/filter.cpp
+   src/optris_driver.cpp src/filter.cpp src/simple_stat.cpp
 )
 target_link_libraries(optris_driver
   irimager
