@@ -8,6 +8,9 @@
 #include "optris_drivers/AutoFlag.h"
 #include <optris_drivers/Temperature.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <optris_drivers/RadparmsConfig.h>
+
 #include "libirimager/IRImager.h"
 #include "libirimager/ImageBuilder.h"
 
@@ -136,6 +139,10 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   nh_private_.param<bool>("use_device_timer", use_device_timer, true);
   nh_private_.param<int>("filter_size", filter_size, 100);
   nh_private_.getParam("camera_name", _node_name);
+  nh_private_.param<double>("emmisivity", emmisivity, 100.0);
+  nh_private_.param<double>("transmissivity", transmissivity, 0.0);
+
+  streaming_ok = false;
 
   // filter
   if (use_device_timer)
@@ -168,6 +175,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   }
 
   _imager = new optris::IRImager(xmlConfig.c_str());
+  _imager->setRadiationParameters((float)emmisivity, (float)transmissivity);
   bufferRaw = new unsigned char[_imager->getRawBufferSize()];
   _imager->setFrameCallback(onThermalFrame);
   _imager->setVisibleFrameCallback(onVisibleFrame);
@@ -182,7 +190,6 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
     _visible_pub = it->advertise("visible_image", 1);
   }
 
-
   // advertise the camera internal timer
    _timer_pub= nh_.advertise<sensor_msgs::TimeReference>("optris_timer", 1 );
 
@@ -192,10 +199,14 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   //advertise all the camera Temperature in a single custom message
   _temp_pub = nh_.advertise <optris_drivers::Temperature> ("internal_temperature", 1);
 
+  //setup dynamic reconfigure server  
+  server = boost::make_shared < dynamic_reconfigure::Server <optris_drivers::RadparmsConfig> > (nh_private_);
+  f = boost::bind(&OptrisDriver::dyn_reconfig_cb, this, _1, _2);
+  server->setCallback(f);
+
   ros::Duration timer_delay(1.0/_imager->getMaxFramerate());
   ROS_INFO ("OptrisDriver: camera timer duration = %f", timer_delay.toSec());
   camera_timer = nh_.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
-  streaming_ok = _imager->startStreaming();
   ROS_INFO("OptrisDriver: init done");
 }
 
@@ -215,4 +226,16 @@ void OptrisDriver::camera_timer_callback (const ros::TimerEvent& e)
      _imager->releaseFrame();
   }
 }
+
+void OptrisDriver::dyn_reconfig_cb(optris_drivers::RadparmsConfig &config, uint32_t level) {
+  ROS_INFO("Reconfigure Request: %f %f", config.emmisivity, config.transmissivity);
+  streaming_ok = false;
+  _imager->stopStreaming();
+  emmisivity = config.emmisivity;
+  transmissivity = config.transmissivity;
+  _imager->setRadiationParameters((float)emmisivity, (float)transmissivity);
+  streaming_ok = _imager->startStreaming();
+}
+
+
 

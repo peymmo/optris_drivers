@@ -52,6 +52,7 @@ generate_messages(
 
 generate_dynamic_reconfigure_options(
   cfg/binary.cfg
+  cfg/Radparms.cfg
 )
 
 ###################################

@@ -11,6 +11,9 @@
 #include "optris_drivers/AutoFlag.h"
 #include <optris_drivers/Temperature.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <optris_drivers/RadparmsConfig.h>
+
 #include "libirimager/IRImager.h"
 #include "libirimager/ImageBuilder.h"
 
@@ -38,6 +41,8 @@ class OptrisDriver {
     image_transport::ImageTransport *it;
     image_transport::CameraPublisher _thermal_pub;
     image_transport::Publisher _visible_pub;
+    boost::shared_ptr < dynamic_reconfigure::Server <optris_drivers::RadparmsConfig> > server;
+    dynamic_reconfigure::Server<optris_drivers::RadparmsConfig>::CallbackType f;
 
     ros::Publisher _timer_pub;
     ros::Publisher _temp_pub;
@@ -58,10 +63,13 @@ class OptrisDriver {
     std::string _thermalframe_id,_visibleframe_id;
     std::string _camera_calibration_url;
     std::string _node_name;
+    double emmisivity;
+    double transmissivity;
 
     bool onAutoFlag(optris_drivers::AutoFlag::Request &req, optris_drivers::AutoFlag::Response &res);
     bool onForceFlag(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
     void camera_timer_callback (const ros::TimerEvent& e);
+    void dyn_reconfig_cb(optris_drivers::RadparmsConfig &config, uint32_t level);
 };
 
 
