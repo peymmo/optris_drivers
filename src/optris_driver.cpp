@@ -207,7 +207,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   f = boost::bind(&OptrisDriver::dyn_reconfig_cb, this, _1, _2);
   server->setCallback(f);
 
-  ros::Duration timer_delay(1.0/(_imager->getMaxFramerate()*10.0));
+  ros::Duration timer_delay(1.0/(_imager->getMaxFramerate()*100.0));
   ROS_INFO ("OptrisDriver: camera timer duration = %f", timer_delay.toSec());
   camera_timer = nh_.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
   ROS_INFO("OptrisDriver: init done");
