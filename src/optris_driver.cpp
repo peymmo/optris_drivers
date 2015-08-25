@@ -27,9 +27,8 @@ using namespace std;
  */
 void OptrisDriver::onThermalFrame(unsigned short* image, unsigned int w, unsigned int h, long long timestamp, void *arg)
 {
-  OptrisDriver *p = (OptrisDriver *) arg;
-
   ros::Time ros_now = ros::Time::now();
+  OptrisDriver *p = (OptrisDriver *) arg;
   ros::Time ts;
 
   if (!p->use_device_timer)
@@ -143,6 +142,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   nh_private_.getParam("camera_name", _node_name);
   nh_private_.param<double>("emmisivity", emmisivity, 100.0);
   nh_private_.param<double>("transmissivity", transmissivity, 0.0);
+  nh_private_.param<double>("sampling_multiplier", sampling_multiplier, 10.0);
 
   streaming_ok = false;
   processing_image = false;
@@ -207,7 +207,7 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
   f = boost::bind(&OptrisDriver::dyn_reconfig_cb, this, _1, _2);
   server->setCallback(f);
 
-  ros::Duration timer_delay(1.0/(_imager->getMaxFramerate()*100.0));
+  ros::Duration timer_delay(1.0/(_imager->getMaxFramerate()*sampling_multiplier));
   ROS_INFO ("OptrisDriver: camera timer duration = %f", timer_delay.toSec());
   camera_timer = nh_.createTimer (timer_delay, &OptrisDriver::camera_timer_callback, this);
   ROS_INFO("OptrisDriver: init done");

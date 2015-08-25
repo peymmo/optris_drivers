@@ -68,6 +68,7 @@ class OptrisDriver {
     std::string _node_name;
     double emmisivity;
     double transmissivity;
+    double sampling_multiplier;
 
     bool onAutoFlag(optris_drivers::AutoFlag::Request &req, optris_drivers::AutoFlag::Response &res);
     bool onForceFlag(std_srvs::Empty::Request& req, std_srvs::Empty::Response& res);
