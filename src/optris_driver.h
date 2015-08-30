@@ -47,6 +47,7 @@ class OptrisDriver {
 
     ros::Publisher _timer_pub;
     ros::Publisher _temp_pub;
+    ros::Publisher _optris_ready_pub;
 
     ros::ServiceServer sAuto;
     ros::ServiceServer sForce;
@@ -60,6 +61,11 @@ class OptrisDriver {
     Filter * optris_timer_filter;
     double prev_timestamp;
     SimpleStat cb_duration;
+    bool optris_camera_ready_flag;
+    bool prev_optris_camera_ready_flag;
+    double prev_temp_ts;
+    double prev_temp;
+    bool first_image_flag;
 
     bool use_device_timer;
     int filter_size;

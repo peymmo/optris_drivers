@@ -4,6 +4,7 @@
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/TimeReference.h>
 #include "std_msgs/Float32.h"
+#include "std_msgs/Bool.h"
 #include "std_srvs/Empty.h"
 #include "optris_drivers/AutoFlag.h"
 #include <optris_drivers/Temperature.h>
@@ -94,6 +95,29 @@ void OptrisDriver::onThermalFrame(unsigned short* image, unsigned int w, unsigne
   _internal_temperature->temperature_chip = p->_imager->getTempChip();
   p->_temp_pub.publish(_internal_temperature);
 
+  std_msgs::BoolPtr msg_ptr(new std_msgs::Bool);
+  // set the current value of the optris_camera_ready_flag
+  if (p->first_image_flag) {
+    p->prev_temp_ts = ros_now.toSec();
+    p->prev_temp = _internal_temperature->temperature_flag;
+    p->first_image_flag = false;
+  } else {
+    if ((ros_now.toSec()-p->prev_temp_ts) > 60.00) {
+      if (fabs(_internal_temperature->temperature_flag - p->prev_temp) < 0.15)
+        p->optris_camera_ready_flag = true;
+      p->prev_temp = _internal_temperature->temperature_flag;
+      p->prev_temp_ts = ros_now.toSec();
+      ROS_INFO("optris_driver: current temp = %f", p->prev_temp);
+    }
+  }
+
+  // publish flag if changed
+  if (p->optris_camera_ready_flag != p->prev_optris_camera_ready_flag) {
+    p->prev_optris_camera_ready_flag = p->optris_camera_ready_flag;
+    msg_ptr->data = p->optris_camera_ready_flag;
+    p->_optris_ready_pub.publish (msg_ptr);
+  }
+
   p->cb_duration.add_data (ros::Time::now().toSec() - ros_now.toSec());
 }
 
@@ -146,6 +170,9 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
 
   streaming_ok = false;
   processing_image = false;
+  optris_camera_ready_flag = false;
+  prev_optris_camera_ready_flag = false;
+  first_image_flag = true;
 
   // filter
   if (use_device_timer)
@@ -201,6 +228,9 @@ OptrisDriver::OptrisDriver(ros::NodeHandle n, ros::NodeHandle n_):
 
   //advertise all the camera Temperature in a single custom message
   _temp_pub = nh_.advertise <optris_drivers::Temperature> ("internal_temperature", 1);
+
+  //advertise the camera ready flag
+  _optris_ready_pub = nh_.advertise <std_msgs::Bool> ("warmed_up", 1, true);
 
   //setup dynamic reconfigure server  
   server = boost::make_shared < dynamic_reconfigure::Server <optris_drivers::RadparmsConfig> > (nh_private_);
