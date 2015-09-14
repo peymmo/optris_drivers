@@ -13,6 +13,8 @@
      <!-- Camera calibration file -->
     <param name="calibration_file"  type="string" value="$(arg calibration_file)" />
     <param name="camera_name"  type="string" value="$(arg camera_node)" />
+    <param name="use_device_timer" type="bool" value="false" />
+    <param name="use_device_timer" type="bool" value="false" />
   </node>
 
   <node pkg="nodelet" type="nodelet" name="colorconvert"

@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="optrisId" default="13120040" />
+  <arg name="optrisId" default="15061004" />
   <arg name="camera_node" default="optris_$(arg optrisId)" />
   <arg name="calibration_file" default="file://$(find optris_drivers)/calibration/optris_$(arg optrisId).yaml" />
 
