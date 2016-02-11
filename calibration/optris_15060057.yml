@@ -1,0 +1,20 @@
+image_width: 382
+image_height: 288
+camera_name: optris_15060057
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [377.272318, 0, 188.988759, 0, 377.070015, 148.113732, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.428831, 0.249703, -0.000886, -0.000218, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [333.655609, 0, 187.907519, 0, 0, 351.475128, 147.98471, 0, 0, 0, 1, 0]
